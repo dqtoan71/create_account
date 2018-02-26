@@ -11,11 +11,6 @@ namespace toandang\create_account;
 
 class account
 {
-//    public static function world()
-//    {
-//        return 'Hello World, Composer!';
-//    }
-
     private $db;
     private $username;
     private $email;
