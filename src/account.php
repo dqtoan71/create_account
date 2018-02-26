@@ -38,15 +38,13 @@ class account
 
         if (!empty($param['username']) && !empty($param['password']) && !empty($param['email'])) {
 
-            return true;
-
             $this->username = $this->db->real_escape_string($param['username']);
             $this->password = sha1($this->db->real_escape_string($param['password']));
             $this->email = $this->db->real_escape_string($param['email']);
 
             $query  = 'INSERT INTO users (user, password, email) '
                 . 'VALUES ("' . $this->username . '", "' . $this->password . '", "' . $this->email . '")';
-
+            return $query;
             return $this->db->query($query);
 
         }
