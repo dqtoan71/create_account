@@ -14,9 +14,6 @@ class account
     private $db;
     private $username;
     private $email;
-    private $is_logged = false;
-    private $msg = array();
-    private $error = array();
 
     // Create a new user object
 
@@ -25,38 +22,6 @@ class account
         session_start();
 
         $this->db = $db;
-
-        $this->update_messages();
-
-        if (isset($_GET['logout'])) {
-
-            $this->logout();
-
-        } elseif (isset($_COOKIE['username']) || (!empty($_SESSION['username']) && $_SESSION['is_logged']))  {
-
-            $this->is_logged = true;
-            $this->username = $_SESSION['username'];
-            $this->email = $_SESSION['email'];
-
-            if (isset($_POST['update'])) {
-
-                $this->update($this->username);
-
-            } elseif (isset($_POST['register'])) {
-
-                $this->register();
-
-            }
-
-        } elseif (isset($_POST['login'])) {
-
-            $this->login();
-
-        } elseif ($this->empty_db() && isset($_POST['register'])) {
-
-            $this->register();
-
-        } else if (!$this->db_exists()) $this->create_db();
 
         return $this;
     }
@@ -69,142 +34,23 @@ class account
 
     public function get_email() { return $this->email; }
 
-    // Check if the user is logged
-
-    public function is_logged() { return $this->is_logged; }
-
-    // Get info messages
-
-    public function get_info() { return $this->msg; }
-
-    // Get errors
-
-    public function get_error() { return $this->error; }
-
-    // Copy error & info messages from $_SESSION to the user object
-
-    private function update_messages() {
-        if (isset($_SESSION['msg']) && $_SESSION['msg'] != '') {
-            $this->msg = array_merge($this->msg, $_SESSION['msg']);
-            $_SESSION['msg'] = '';
-        }
-        if (isset($_SESSION['error']) && $_SESSION['error'] != '') {
-            $this->error = array_merge($this->error, $_SESSION['error']);
-            $_SESSION['error'] = '';
-        }
-    }
-
-    // Login
-
-    public function login() {
-
-        if (!empty($_POST['username']) && !empty($_POST['password'])) {
-
-            $this->username = $this->db->real_escape_string($_POST['username']);
-            $this->password = sha1($this->db->real_escape_string($_POST['password']));
-
-            if ($row = $this->verify_password()) {
-
-                session_regenerate_id(true);
-                $_SESSION['id'] = session_id();
-                $_SESSION['username'] = $this->username;
-                $_SESSION['email'] = $row->email;
-                $_SESSION['is_logged'] = true;
-                $this->is_logged = true;
-                // Set a cookie that expires in one week
-                if (isset($_POST['remember']))
-                    setcookie('username', $this->username, time() + 604800);
-                // To avoid resending the form on refreshing
-                header('Location: ' . $_SERVER['REQUEST_URI']);
-                exit();
-
-            } else $this->error[] = 'Wrong user or password.';
-
-        } elseif (empty($_POST['username'])) {
-
-            $this->error[] = 'Username field was empty.';
-
-        } elseif (empty($_POST['password'])) {
-
-            $this->error[] = 'Password field was empty.';
-        }
-
-    }
-
-    // Check if username and password match
-
-    private function verify_password() {
-
-        $query  = 'SELECT * FROM users '
-            . 'WHERE user = "' . $this->username . '" '
-            . 'AND password = "' . $this->password . '"';
-
-        return ($this->db->query($query)->fetch_object());
-
-    }
-
-    // Logout function
-
-    public function logout() {
-
-        session_unset();
-        session_destroy();
-        $this->is_logged = false;
-        setcookie('username', '', time()-3600);
-        header('Location: index.php');
-        exit();
-
-    }
-
     // Register a new user
 
-    public function register() {
+    public function register($param) {
 
-        if (!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['confirm'])) {
+        if (!empty($param['username']) && !empty($param['password']) && !empty($param['email'])) {
 
-            if ($_POST['password'] == $_POST['confirm']) {
+            $username = $this->db->real_escape_string($param['username']);
+            $password = sha1($this->db->real_escape_string($param['password']));
+            $email = $this->db->real_escape_string($param['email']);
 
-                $first_user = $this->empty_db();
-                $username = $this->db->real_escape_string($_POST['username']);
-                $password = sha1($this->db->real_escape_string($_POST['password']));
-                $email = $this->db->real_escape_string($_POST['email']);
+            $query  = 'INSERT INTO users (user, password, email) '
+                . 'VALUES ("' . $username . '", "' . $password . '", "' . $email . '")';
 
-                $query  = 'INSERT INTO users (user, password, email) '
-                    . 'VALUES ("' . $username . '", "' . $password . '", "' . $email . '")';
+            return $this->db->query($query);
 
-                if ($this->db->query($query)) {
-
-                    if ($first_user) {
-                        session_regenerate_id(true);
-                        $_SESSION['id'] = session_id();
-                        $_SESSION['username'] = $username;
-                        $_SESSION['email'] = $email;
-                        $_SESSION['is_logged'] = true;
-                        $this->is_logged = true;
-                    } else {
-                        $this->msg[] = 'User created.';
-                        $_SESSION['msg'] = $this->msg;
-                    }
-                    // To avoid resending the form on refreshing
-                    header('Location: ' . $_SERVER['REQUEST_URI']);
-                    exit();
-
-                } else $this->error[] = 'Username already exists.';
-
-            } else $this->error[] = 'Passwords don\'t match.';
-
-        } elseif (empty($_POST['username'])) {
-
-            $this->error[] = 'Username field was empty.';
-
-        } elseif (empty($_POST['password'])) {
-
-            $this->error[] = 'Password field was empty.';
-
-        } elseif (empty($_POST['confirm'])) {
-
-            $this->error[] = 'You need to confirm the password.';
         }
+        return false;
 
     }
 
