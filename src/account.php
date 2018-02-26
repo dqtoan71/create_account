@@ -42,9 +42,9 @@ class account
             $password = sha1($this->db->real_escape_string($param['password']));
             $email = $this->db->real_escape_string($param['email']);
 
-            $query  = "INSERT INTO users (user, password, email) VALUES ('".$username."','". $password ."','".$email."')";
+            $query  = "INSERT INTO users (username, password, email) VALUES ('".$username."','". $password ."','".$email."')";
 
-            return $query;
+
             return $this->db->query($query);
 
         }
