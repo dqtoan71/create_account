@@ -38,6 +38,8 @@ class account
 
         if (!empty($param['username']) && !empty($param['password']) && !empty($param['email'])) {
 
+            return true;
+
             $this->username = $this->db->real_escape_string($param['username']);
             $this->password = sha1($this->db->real_escape_string($param['password']));
             $this->email = $this->db->real_escape_string($param['email']);
