@@ -42,14 +42,23 @@ class account
             $password = sha1($this->db->real_escape_string($param['password']));
             $email = $this->db->real_escape_string($param['email']);
 
+            $row_user = $this->get_user_info($username, $email);
+            if($row_user->num_rows > 0){
+                return false;
+            }
             $query  = "INSERT INTO users (username, password, email) VALUES ('".$username."','". $password ."','".$email."')";
-
-
             return $this->db->query($query);
 
         }
         return false;
 
     }
+
+    // Get info about an user
+    public function get_user_info($username, $email) {
+        $query = 'SELECT * FROM users WHERE username = "' . $username . '" and email = "'. $email .'"';
+        return $this->db->query($query);
+    }
+
 
 }
