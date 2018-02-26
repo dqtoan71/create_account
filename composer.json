@@ -2,7 +2,7 @@
     "name": "toandang/create_account",
     "description": "the first composer package",
     "type": "php",
-    "license": "new",
+    "license": "MIT",
     "authors": [
         {
             "name": "toandang",
