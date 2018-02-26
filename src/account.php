@@ -43,6 +43,8 @@ class account
             $email = $this->db->real_escape_string($param['email']);
 
             $query  = "INSERT INTO users (user, password, email) VALUES ('".$username."','". $password ."','".$email."')";
+
+            return $query;
             return $this->db->query($query);
 
         }
