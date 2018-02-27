@@ -55,6 +55,7 @@ class account
 
     }
 
+    // Update user
     public function update($param) {
         if (!empty($param['id']) && !empty($param['username']) && !empty($param['email'])) {
             $id = $this->db->real_escape_string($param['id']);
@@ -75,12 +76,24 @@ class account
 
             $query  = "UPDATE users "
                 . "SET username = '" . $username . "' ,"
-                . "SET email = '" . $email . "' ,"
+                . "email = '" . $email . "' "
                 . "WHERE id = '" . $id . "'";
 
             return $this->db->query($query);
         }
         return false;
+    }
+
+    //Delete user
+    public function delete($id) {
+        $query = 'DELETE FROM users WHERE id = "' . $id . '"';
+
+        // If not exists id => return
+        $row_user = $this->get_user_by_id($id);
+        if($row_user->num_rows == 0){
+            return false;
+        }
+        return ($this->db->query($query));
     }
 
     // Get info about an user
@@ -97,7 +110,7 @@ class account
 
     // Get all the existing users
     public function get_users() {
-        $query = 'SELECT username, email FROM users';
+        $query = 'SELECT id, username, email FROM users';
         return ($this->db->query($query));
     }
 
