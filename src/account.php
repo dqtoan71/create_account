@@ -60,5 +60,11 @@ class account
         return $this->db->query($query);
     }
 
+    // Get all the existing users
+    public function get_users() {
+        $query = 'SELECT username, email FROM users';
+        return ($this->db->query($query));
+    }
+
 
 }
