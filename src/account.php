@@ -42,6 +42,7 @@ class account
             $password = sha1($this->db->real_escape_string($param['password']));
             $email = $this->db->real_escape_string($param['email']);
 
+            // Test username, email exists
             $row_user = $this->get_user_info($username, $email);
             if($row_user->num_rows > 0){
                 return false;
@@ -52,6 +53,40 @@ class account
         }
         return false;
 
+    }
+
+    public function update($param) {
+        if (!empty($param['id']) && !empty($param['username']) && !empty($param['email'])) {
+            $id = $this->db->real_escape_string($param['id']);
+            $username = $this->db->real_escape_string($param['username']);
+            $email = $this->db->real_escape_string($param['email']);
+
+            // If not exists id => return
+            $row_user = $this->get_user_by_id($id);
+            if($row_user->num_rows == 0){
+                return false;
+            }
+
+            // Test username, email exists
+            $row_user = $this->get_user_info($username, $email);
+            if($row_user->num_rows > 0){
+                return false;
+            }
+
+            $query  = "UPDATE users "
+                . "SET username = '" . $username . "' ,"
+                . "SET email = '" . $email . "' ,"
+                . "WHERE id = '" . $id . "'";
+
+            return $this->db->query($query);
+        }
+        return false;
+    }
+
+    // Get info about an user
+    public function get_user_by_id($id) {
+        $query = 'SELECT * FROM users WHERE id = "' . $id . '"';
+        return $this->db->query($query);
     }
 
     // Get info about an user
